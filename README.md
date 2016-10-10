@@ -1,7 +1,13 @@
-This is a simple TOTP _(Time-based One-time Password)_ CLI tool.
-TOTP is the most common mechanism for 2FA _(Two-Factor-Authentication)_.
-You can manage and organize your accounts with namespaces
-and protect your data with a password.
+This is a simple Go library to manage commands for your CLI tool.
+Easy to use and now you can focus on Business Logic instead of building
+the command routing.
+
+### What this library does for you?
+
+Manage your separated commands. How? Generates a general help and command
+specific helps for your commands. If your command fails somewhere
+(`panic` for example), commander will display the error message and
+the command specific help to guide your user.
 
 ### Install
 
