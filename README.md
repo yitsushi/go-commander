@@ -9,7 +9,7 @@ and protect your data with a password.
 $ go get https://github.com/Yitsushi/go-commander
 ```
 
-### Sample output _(from [totp-cli](https://github.com/Yistsuhi/totp-cli))_
+### Sample output _(from [totp-cli](https://github.com/Yitsushi/totp-cli))_
 
 ```
 $ totp-cli help
@@ -44,19 +44,19 @@ func (c *YourCommand) Execute() {
 }
 
 func (c *YourCommand) ArgumentDescription() string {
-  return ""
+  return "[name]"
 }
 
 func (c *YourCommand) Description() string {
-  return ""
+  return "This is my first command"
 }
 
 func (c *YourCommand) Help() string {
-  return ""
+  return "This is a useless command, but at least I have one command"
 }
 
 func (c *YourCommand) Examples() []string {
-  return []string{}
+  return []string{"", "test"}
 }
 
 // Main Section
@@ -75,9 +75,15 @@ Now you have a CLI tool with two commands: `help` and `your-command`.
 ❯ go build mytool.go
 
 ❯ ./mytool
-your-command
-help [command]   Display this help or a command specific help
+your-command [name]   This is my first command
+help [command]        Display this help or a command specific help
 
 ❯ ./mytool help your-command
-Usage: mytool your-command
+Usage: mytool your-command [name]
+
+This is a useless command, but at least I have one command
+
+Examples:
+  mytool your-command
+  mytool your-command test
 ```
