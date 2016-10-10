@@ -48,22 +48,33 @@ import "github.com/Yitsushi/go-commander"
 type YourCommand struct {
 }
 
+// Executed only on command call
 func (c *YourCommand) Execute() {
   // Command Action
 }
 
+// Agument list, only for help messages
+// If you don't have any arguments, just return an empty string
+// Basic convention: <regisred_argument> [optional_argument]
 func (c *YourCommand) ArgumentDescription() string {
   return "[name]"
 }
 
+// Help message for your command, only for help messages
+// General Help
 func (c *YourCommand) Description() string {
   return "This is my first command"
 }
 
+// Help message, long format.
+// Command specific help
 func (c *YourCommand) Help() string {
   return "This is a useless command, but at least I have one command"
 }
 
+// Examples are generated in this form:
+//   loop through return array:
+//     print: appname commandname item_in_this_array
 func (c *YourCommand) Examples() []string {
   return []string{"", "test"}
 }
