@@ -1,3 +1,6 @@
+[![Go Report
+Card](https://goreportcard.com/badge/github.com/Yitsushi/go-commander)](https://goreportcard.com/report/github.com/Yitsushi/go-commander)
+
 This is a simple Go library to manage commands for your CLI tool.
 Easy to use and now you can focus on Business Logic instead of building
 the command routing.
