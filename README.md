@@ -44,7 +44,7 @@ package main
 // Import the package
 import "github.com/Yitsushi/go-commander"
 
-// Yout Command
+// Your Command
 type YourCommand struct {
 }
 
@@ -53,9 +53,9 @@ func (c *YourCommand) Execute() {
   // Command Action
 }
 
-// Agument list, only for help messages
+// Argument list, only for help messages
 // If you don't have any arguments, just return an empty string
-// Basic convention: <regisred_argument> [optional_argument]
+// Basic convention: <registered_argument> [optional_argument]
 func (c *YourCommand) ArgumentDescription() string {
   return "[name]"
 }
