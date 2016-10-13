@@ -11,17 +11,18 @@ import (
 // CommandRegistry will handle all CLI request
 // and find the route to the proper Command
 type CommandRegistry struct {
-	Commands map[string]CommandInterface
+	Commands map[string]*CommandWrapper
+	Helper   *CommandHelper
 
 	maximumCommandLength int
 }
 
-// Register function is used to register a Command in CommandRegistry
-// the first argument will be the command from the CLI
-// the second argument will be the handler that implements CommandInterface
-func (c *CommandRegistry) Register(name string, handler CommandInterface) {
-	c.Commands[name] = handler
-	commandLength := len(fmt.Sprintf("%s %s", name, handler.ArgumentDescription()))
+// Register is a function that adds your command into the registry
+func (c *CommandRegistry) Register(f NewCommandFunc) {
+	wrapper := f(c.executableName())
+	name := wrapper.Help.Name
+	c.Commands[name] = wrapper
+	commandLength := len(fmt.Sprintf("%s %s", name, wrapper.Help.Arguments))
 	if commandLength > c.maximumCommandLength {
 		c.maximumCommandLength = commandLength
 	}
@@ -32,6 +33,8 @@ func (c *CommandRegistry) Register(name string, handler CommandInterface) {
 // if something went wrong or the user asked for it.
 func (c *CommandRegistry) Execute() {
 	name := flag.Arg(0)
+	c.Helper = &CommandHelper{}
+	c.Helper.Parse()
 	if command, ok := c.Commands[name]; ok {
 		defer func() {
 			if err := recover(); err != nil {
@@ -40,7 +43,7 @@ func (c *CommandRegistry) Execute() {
 			}
 		}()
 
-		command.Execute()
+		command.Handler.Execute(c.Helper)
 	} else {
 		c.Help()
 	}
@@ -57,8 +60,8 @@ func (c *CommandRegistry) Help() {
 	for name, command := range c.Commands {
 		fmt.Printf(
 			format,
-			fmt.Sprintf("%s %s", name, command.ArgumentDescription()),
-			command.Description(),
+			fmt.Sprintf("%s %s", name, command.Help.Arguments),
+			command.Help.ShortDescription,
 		)
 	}
 	fmt.Printf(
@@ -71,16 +74,16 @@ func (c *CommandRegistry) Help() {
 // CommandHelp prints more detailed help for a specific Command
 func (c *CommandRegistry) CommandHelp(name string) {
 	if command, ok := c.Commands[name]; ok {
-		fmt.Printf("Usage: %s %s %s\n", c.executableName(), name, command.ArgumentDescription())
+		fmt.Printf("Usage: %s %s %s\n", c.executableName(), name, command.Help.Arguments)
 
-		if command.Help() != "" {
+		if command.Help.LongDescription != "" {
 			fmt.Println("")
-			fmt.Println(command.Help())
+			fmt.Println(command.Help.LongDescription)
 		}
 
-		if len(command.Examples()) > 0 {
+		if len(command.Help.Examples) > 0 {
 			fmt.Printf("\nExamples:\n")
-			for _, line := range command.Examples() {
+			for _, line := range command.Help.Examples {
 				fmt.Printf("  %s %s %s\n", c.executableName(), name, line)
 			}
 		}
@@ -98,6 +101,6 @@ func (c *CommandRegistry) executableName() string {
 func NewCommandRegistry() *CommandRegistry {
 	flag.Parse()
 	return &CommandRegistry{
-		Commands: map[string]CommandInterface{},
+		Commands: map[string]*CommandWrapper{},
 	}
 }
