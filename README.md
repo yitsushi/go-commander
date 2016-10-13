@@ -35,7 +35,7 @@ help [command]                    Display this help or a command specific help
 
 ### Usage
 
-Every single command has to implement `CommandInterface`.
+Every single command has to implement `CommandHandler`.
 Check [this project](https://github.com/Yitsushi/totp-cli) for examples.
 
 ```
@@ -49,41 +49,33 @@ type YourCommand struct {
 }
 
 // Executed only on command call
-func (c *YourCommand) Execute() {
+func (c *YourCommand) Execute(opts *commander.CommandHelper) {
   // Command Action
 }
 
-// Argument list, only for help messages
-// If you don't have any arguments, just return an empty string
-// Basic convention: <registered_argument> [optional_argument]
-func (c *YourCommand) ArgumentDescription() string {
-  return "[name]"
-}
-
-// Help message for your command, only for help messages
-// General Help
-func (c *YourCommand) Description() string {
-  return "This is my first command"
-}
-
-// Help message, long format.
-// Command specific help
-func (c *YourCommand) Help() string {
-  return "This is a useless command, but at least I have one command"
-}
-
-// Examples are generated in this form:
-//   loop through return array:
-//     print: appname commandname item_in_this_array
-func (c *YourCommand) Examples() []string {
-  return []string{"", "test"}
+func NewYourCommand(appName string) *commander.CommandWrapper {
+  return &commander.CommandWrapper{
+    Handler: &YourCommand{},
+    Help: &commander.CommandDescriptor{
+      Name:             "your-command",
+      ShortDescription: "This is my own command",
+      LongDescription:  `This is a very long
+description about this command.`,
+      Arguments:        "<filename> [optional-argument]",
+      Examples:         []string {
+        "test.txt",
+        "test.txt copy",
+        "test.txt move",
+      },
+    },
+  }
 }
 
 // Main Section
 func main() {
 	registry := commander.NewCommandRegistry()
 
-	registry.Register("your-command", &YourCommand{})
+  registry.Register(NewYourCommand)
 
 	registry.Execute()
 }
@@ -95,15 +87,17 @@ Now you have a CLI tool with two commands: `help` and `your-command`.
 ❯ go build mytool.go
 
 ❯ ./mytool
-your-command [name]   This is my first command
-help [command]        Display this help or a command specific help
+your-command <filename> [optional-argument]   This is my own command
+help [command]                                Display this help or a command specific help
 
 ❯ ./mytool help your-command
-Usage: mytool your-command [name]
+Usage: mytool your-command <filename> [optional-argument]
 
-This is a useless command, but at least I have one command
+This is a very long
+description about this command.
 
 Examples:
-  mytool your-command
-  mytool your-command test
+  mytool your-command test.txt
+  mytool your-command test.txt copy
+  mytool your-command test.txt move
 ```
