@@ -30,6 +30,36 @@ func (c *CommandHelper) Log(message string) {
 	}
 }
 
+// Arg return with an item from Flags based on the given index
+// emtpy string if not exists
+func (c *CommandHelper) Arg(index int) string {
+	if len(c.Args) > index {
+		return c.Args[index]
+	}
+
+	return ""
+}
+
+// Flag return with an item from Flags based on the given key
+// false if not exists
+func (c *CommandHelper) Flag(key string) bool {
+	if value, ok := c.Flags[key]; ok {
+		return value
+	}
+
+	return false
+}
+
+// Opt return with an item from Opts based on the given key
+// empty string if not exists
+func (c *CommandHelper) Opt(key string) string {
+	if value, ok := c.Opts[key]; ok {
+		return value
+	}
+
+	return ""
+}
+
 // Parse is a helper method that parses all passed arguments
 // flags, opts and arguments
 func (c *CommandHelper) Parse() {
