@@ -59,7 +59,7 @@ help [command]                    Display this help or a command specific help
 <h3>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h3>
 
-<p>Every single command has to implement <code>CommandInterface</code>.
+<p>Every single command has to implement <code>CommandHandler</code>.
 Check <a href="https://github.com/Yitsushi/totp-cli">this project</a> for examples.</p>
 
 <pre><code>package main
@@ -67,35 +67,38 @@ Check <a href="https://github.com/Yitsushi/totp-cli">this project</a> for exampl
 // Import the package
 import "github.com/Yitsushi/go-commander"
 
-// Yout Command
+// Your Command
 type YourCommand struct {
 }
 
-func (c *YourCommand) Execute() {
+// Executed only on command call
+func (c *YourCommand) Execute(opts *commander.CommandHelper) {
   // Command Action
 }
 
-func (c *YourCommand) ArgumentDescription() string {
-  return "[name]"
-}
-
-func (c *YourCommand) Description() string {
-  return "This is my first command"
-}
-
-func (c *YourCommand) Help() string {
-  return "This is a useless command, but at least I have one command"
-}
-
-func (c *YourCommand) Examples() []string {
-  return []string{"", "test"}
+func NewYourCommand(appName string) *commander.CommandWrapper {
+  return &amp;commander.CommandWrapper{
+    Handler: &amp;YourCommand{},
+    Help: &amp;commander.CommandDescriptor{
+      Name:             "your-command",
+      ShortDescription: "This is my own command",
+      LongDescription:  `This is a very long
+description about this command.`,
+      Arguments:        "&lt;filename&gt; [optional-argument]",
+      Examples:         []string {
+        "test.txt",
+        "test.txt copy",
+        "test.txt move",
+      },
+    },
+  }
 }
 
 // Main Section
 func main() {
     registry := commander.NewCommandRegistry()
 
-    registry.Register("your-command", &amp;YourCommand{})
+  registry.Register(NewYourCommand)
 
     registry.Execute()
 }
@@ -106,17 +109,19 @@ func main() {
 <pre><code>❯ go build mytool.go
 
 ❯ ./mytool
-your-command [name]   This is my first command
-help [command]        Display this help or a command specific help
+your-command &lt;filename&gt; [optional-argument]   This is my own command
+help [command]                                Display this help or a command specific help
 
 ❯ ./mytool help your-command
-Usage: mytool your-command [name]
+Usage: mytool your-command &lt;filename&gt; [optional-argument]
 
-This is a useless command, but at least I have one command
+This is a very long
+description about this command.
 
 Examples:
-  mytool your-command
-  mytool your-command test
+  mytool your-command test.txt
+  mytool your-command test.txt copy
+  mytool your-command test.txt move
 </code></pre>
 
       <footer class="site-footer">
