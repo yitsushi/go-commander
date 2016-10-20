@@ -75,7 +75,7 @@ description about this command.`,
 func main() {
 	registry := commander.NewCommandRegistry()
 
-  registry.Register(NewYourCommand)
+	registry.Register(NewYourCommand)
 
 	registry.Execute()
 }
