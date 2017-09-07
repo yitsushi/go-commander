@@ -101,3 +101,19 @@ Examples:
   mytool your-command test.txt copy
   mytool your-command test.txt move
 ```
+
+#### How to use subcommand pattern?
+
+When you create your main command, just create a new `CommandRegistry` inside
+the `Execute` function like you did in your `main()` and change `Depth`.
+
+```
+import subcommand "github.com/Yitsushi/mypackage/command/something"
+
+func (c *Something) Execute(opts *commander.CommandHelper) {
+	registry := commander.NewCommandRegistry()
+	registry.Depth = 1
+	registry.Register(subcommand.NewSomethingMySubCommand)
+	registry.Execute()
+}
+```
