@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/kardianos/osext"
 )
@@ -13,6 +14,7 @@ import (
 type CommandRegistry struct {
 	Commands map[string]*CommandWrapper
 	Helper   *CommandHelper
+	Depth    int
 
 	maximumCommandLength int
 }
@@ -32,9 +34,9 @@ func (c *CommandRegistry) Register(f NewCommandFunc) {
 // if the given command it unknown or print the Command specific help
 // if something went wrong or the user asked for it.
 func (c *CommandRegistry) Execute() {
-	name := flag.Arg(0)
+	name := flag.Arg(c.Depth)
 	c.Helper = &CommandHelper{}
-	c.Helper.Parse()
+	c.Helper.Parse(flag.Args()[c.Depth:])
 	if command, ok := c.Commands[name]; ok {
 		defer func() {
 			if err := recover(); err != nil {
@@ -51,8 +53,8 @@ func (c *CommandRegistry) Execute() {
 
 // Help lists all available commands to the user
 func (c *CommandRegistry) Help() {
-	if flag.Arg(0) == "help" && flag.Arg(1) != "" {
-		c.CommandHelp(flag.Arg(1))
+	if flag.Arg(c.Depth) == "help" && flag.Arg(c.Depth+1) != "" {
+		c.CommandHelp(flag.Arg(c.Depth + 1))
 		return
 	}
 
@@ -74,7 +76,14 @@ func (c *CommandRegistry) Help() {
 // CommandHelp prints more detailed help for a specific Command
 func (c *CommandRegistry) CommandHelp(name string) {
 	if command, ok := c.Commands[name]; ok {
-		fmt.Printf("Usage: %s %s %s\n", c.executableName(), name, command.Help.Arguments)
+		extra := ""
+		if c.Depth > 0 {
+			extra = strings.Join(flag.Args()[0:c.Depth], " ")
+		}
+		if len(extra) > 0 {
+			extra += " "
+		}
+		fmt.Printf("Usage: %s %s%s %s\n", c.executableName(), extra, name, command.Help.Arguments)
 
 		if command.Help.LongDescription != "" {
 			fmt.Println("")
@@ -84,7 +93,7 @@ func (c *CommandRegistry) CommandHelp(name string) {
 		if len(command.Help.Examples) > 0 {
 			fmt.Printf("\nExamples:\n")
 			for _, line := range command.Help.Examples {
-				fmt.Printf("  %s %s %s\n", c.executableName(), name, line)
+				fmt.Printf("  %s %s%s %s\n", c.executableName(), extra, name, line)
 			}
 		}
 	}

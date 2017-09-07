@@ -1,7 +1,6 @@
 package commander
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 )
@@ -62,15 +61,15 @@ func (c *CommandHelper) Opt(key string) string {
 
 // Parse is a helper method that parses all passed arguments
 // flags, opts and arguments
-func (c *CommandHelper) Parse() {
+func (c *CommandHelper) Parse(flag []string) {
 	c.Flags = map[string]bool{}
 	c.Opts = map[string]string{}
 
-	if len(flag.Args()) < 1 {
+	if len(flag) < 1 {
 		return
 	}
 
-	arguments := flag.Args()[1:]
+	arguments := flag[1:]
 	for _, arg := range arguments {
 		if len(arg) > 1 && arg[0:2] == "--" {
 			parts := strings.SplitN(arg[2:], "=", 2)
