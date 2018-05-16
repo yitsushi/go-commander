@@ -42,7 +42,7 @@ Check [this project](https://github.com/Yitsushi/totp-cli) for examples.
 package main
 
 // Import the package
-import "github.com/Yitsushi/go-commander"
+import "github.com/yitsushi/go-commander"
 
 // Your Command
 type YourCommand struct {
