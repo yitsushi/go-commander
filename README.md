@@ -15,7 +15,7 @@ the command specific help to guide your user.
 ### Install
 
 ```
-$ go get https://github.com/Yitsushi/go-commander
+$ go get github.com/Yitsushi/go-commander
 ```
 
 ### Sample output _(from [totp-cli](https://github.com/Yitsushi/totp-cli))_
