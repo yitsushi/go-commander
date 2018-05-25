@@ -1,5 +1,5 @@
 [![Go Report
-Card](https://goreportcard.com/badge/github.com/Yitsushi/go-commander)](https://goreportcard.com/report/github.com/Yitsushi/go-commander)
+Card](https://goreportcard.com/badge/github.com/yitsushi/go-commander)](https://goreportcard.com/report/github.com/yitsushi/go-commander)
 
 This is a simple Go library to manage commands for your CLI tool.
 Easy to use and now you can focus on Business Logic instead of building
@@ -15,10 +15,10 @@ the command specific help to guide your user.
 ### Install
 
 ```
-$ go get github.com/Yitsushi/go-commander
+$ go get github.com/yitsushi/go-commander
 ```
 
-### Sample output _(from [totp-cli](https://github.com/Yitsushi/totp-cli))_
+### Sample output _(from [totp-cli](https://github.com/yitsushi/totp-cli))_
 
 ```
 $ totp-cli help
@@ -36,7 +36,7 @@ help [command]                    Display this help or a command specific help
 ### Usage
 
 Every single command has to implement `CommandHandler`.
-Check [this project](https://github.com/Yitsushi/totp-cli) for examples.
+Check [this project](https://github.com/yitsushi/totp-cli) for examples.
 
 ```
 package main
@@ -108,7 +108,7 @@ When you create your main command, just create a new `CommandRegistry` inside
 the `Execute` function like you did in your `main()` and change `Depth`.
 
 ```
-import subcommand "github.com/Yitsushi/mypackage/command/something"
+import subcommand "github.com/yitsushi/mypackage/command/something"
 
 func (c *Something) Execute(opts *commander.CommandHelper) {
 	registry := commander.NewCommandRegistry()
