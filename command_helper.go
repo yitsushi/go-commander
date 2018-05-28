@@ -65,7 +65,7 @@ func (c *CommandHelper) Parse(flag []string) {
 	c.Flags = map[string]bool{}
 	c.Opts = map[string]string{}
 
-	if len(flag) < 1 {
+	if len(flag) < 2 {
 		return
 	}
 
