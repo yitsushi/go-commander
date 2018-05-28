@@ -43,6 +43,9 @@ func (c *CommandRegistry) Execute() {
 			}
 		}()
 
+		if command.Validator != nil {
+			command.Validator(c.Helper)
+		}
 		command.Handler.Execute(c.Helper)
 	} else {
 		if (name != "help") && (name != "") {

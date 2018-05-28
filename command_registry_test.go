@@ -8,6 +8,7 @@ import (
 )
 
 var executeCalled bool
+var validatorCalled bool
 
 // Start: Commands
 // Simple command
@@ -65,6 +66,13 @@ func mockEverything() {
 
 	mockOutput = ""
 	FmtPrintf = mockPrintf
+}
+
+func myValidatoFunction(c *CommandHelper) {
+	validatorCalled = true
+	if !c.Flag("pass-validation") {
+		panic("Sad panda")
+	}
 }
 
 func TestCommandRegistry_executableName(t *testing.T) {
@@ -399,6 +407,58 @@ description about this command.`,
 				return
 			},
 		},
+		{
+			name:    "Register one command with validator, call command, but failed on pre-validation",
+			cliArgs: []string{"my-command", "-v"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Help: &CommandDescriptor{
+							Name:             "my-command",
+							ShortDescription: "This is my own command",
+						},
+						Validator: myValidatoFunction,
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if executeCalled {
+					return "Command should not be called"
+				}
+
+				if !validatorCalled {
+					return "Command preValidator should be called"
+				}
+				return
+			},
+		},
+		{
+			name:    "Register one command with validator, call command, but failed on pre-validation",
+			cliArgs: []string{"my-command", "-v", "--pass-validation"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Help: &CommandDescriptor{
+							Name:             "my-command",
+							ShortDescription: "This is my own command",
+						},
+						Validator: myValidatoFunction,
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if !executeCalled {
+					return "Command should be called"
+				}
+
+				if !validatorCalled {
+					return "Command preValidator should be called"
+				}
+				return
+			},
+		},
 	}
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
@@ -407,6 +467,7 @@ description about this command.`,
 			// Pre-boot
 			os.Args = append([]string{"/some/random/path/my-executable"}, tt.cliArgs...)
 			executeCalled = false
+			validatorCalled = false
 
 			// Boot
 			c := NewCommandRegistry()
