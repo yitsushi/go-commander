@@ -1,5 +1,5 @@
-[![Go Report
-Card](https://goreportcard.com/badge/github.com/yitsushi/go-commander)](https://goreportcard.com/report/github.com/yitsushi/go-commander)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yitsushi/go-commander)](https://goreportcard.com/report/github.com/yitsushi/go-commander)
+[![Build Status](https://travis-ci.org/yitsushi/go-commander.svg?branch=master)](https://travis-ci.org/yitsushi/go-commander)
 
 This is a simple Go library to manage commands for your CLI tool.
 Easy to use and now you can focus on Business Logic instead of building
