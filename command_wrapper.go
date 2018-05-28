@@ -1,5 +1,11 @@
 package commander
 
+import (
+	"fmt"
+
+	"github.com/kardianos/osext"
+)
+
 // CommandWrapper is a general wrapper for a command
 // CommandRegistry will know what to do this a struct like this
 type CommandWrapper struct {
@@ -11,3 +17,9 @@ type CommandWrapper struct {
 
 // NewCommandFunc is the expected type for CommandRegistry.Register
 type NewCommandFunc func(appName string) *CommandWrapper
+
+// OSExtExecutable returns current executable path
+var OSExtExecutable = osext.Executable
+
+// FmtPrintf is fmt.Printf
+var FmtPrintf = fmt.Printf

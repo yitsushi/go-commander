@@ -1,7 +1,6 @@
 package commander
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -25,7 +24,7 @@ type CommandHelper struct {
 // it prints a message if DebugeMode is true
 func (c *CommandHelper) Log(message string) {
 	if c.DebugMode {
-		fmt.Printf("[Debug] %s\n", message)
+		FmtPrintf("[Debug] %s\n", message)
 	}
 }
 

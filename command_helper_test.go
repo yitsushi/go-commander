@@ -314,3 +314,54 @@ func TestCommandHelper_Parse(t *testing.T) {
 		})
 	}
 }
+
+func TestCommandHelper_Log(t *testing.T) {
+	type fields struct {
+		DebugMode   bool
+		VerboseMode bool
+		Flags       map[string]bool
+		Opts        map[string]string
+		Args        []string
+	}
+	tests := []struct {
+		name      string
+		fields    fields
+		message   string
+		hasOutput bool
+	}{
+		{
+			name:      "Logging with debug mode",
+			fields:    fields{DebugMode: true},
+			message:   "Test Message",
+			hasOutput: true,
+		},
+		{
+			name:      "Skip Logging without debug mode",
+			fields:    fields{DebugMode: false},
+			message:   "Test Message",
+			hasOutput: false,
+		},
+	}
+
+	var fmtOutput string
+	FmtPrintf = func(format string, a ...interface{}) (int, error) {
+		fmtOutput = fmt.Sprintf(format, a...)
+		return 0, nil
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fmtOutput = ""
+			c := &CommandHelper{
+				DebugMode:   tt.fields.DebugMode,
+				VerboseMode: tt.fields.VerboseMode,
+				Flags:       tt.fields.Flags,
+				Opts:        tt.fields.Opts,
+				Args:        tt.fields.Args,
+			}
+			c.Log(tt.message)
+			if (fmtOutput != "") != tt.hasOutput {
+				t.Errorf("Logging seems broken :( [%v] output(%s)", tt.hasOutput, fmtOutput)
+			}
+		})
+	}
+}

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"path"
 	"strings"
-
-	"github.com/kardianos/osext"
 )
 
 // CommandRegistry will handle all CLI request
@@ -40,13 +38,16 @@ func (c *CommandRegistry) Execute() {
 	if command, ok := c.Commands[name]; ok {
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Printf("[E] %s\n\n", err)
+				FmtPrintf("[E] %s\n\n", err)
 				c.CommandHelp(name)
 			}
 		}()
 
 		command.Handler.Execute(c.Helper)
 	} else {
+		if (name != "help") && (name != "") {
+			FmtPrintf("Command not found: %s\n", name)
+		}
 		c.Help()
 	}
 }
@@ -60,13 +61,13 @@ func (c *CommandRegistry) Help() {
 
 	format := fmt.Sprintf("%%-%ds   %%s\n", c.maximumCommandLength)
 	for name, command := range c.Commands {
-		fmt.Printf(
+		FmtPrintf(
 			format,
 			fmt.Sprintf("%s %s", name, command.Help.Arguments),
 			command.Help.ShortDescription,
 		)
 	}
-	fmt.Printf(
+	FmtPrintf(
 		format,
 		"help [command]",
 		"Display this help or a command specific help",
@@ -83,17 +84,17 @@ func (c *CommandRegistry) CommandHelp(name string) {
 		if len(extra) > 0 {
 			extra += " "
 		}
-		fmt.Printf("Usage: %s %s%s %s\n", c.executableName(), extra, name, command.Help.Arguments)
+		FmtPrintf("Usage: %s %s%s %s\n", c.executableName(), extra, name, command.Help.Arguments)
 
 		if command.Help.LongDescription != "" {
-			fmt.Println("")
-			fmt.Println(command.Help.LongDescription)
+			FmtPrintf("")
+			FmtPrintf(command.Help.LongDescription)
 		}
 
 		if len(command.Help.Examples) > 0 {
-			fmt.Printf("\nExamples:\n")
+			FmtPrintf("\nExamples:\n")
 			for _, line := range command.Help.Examples {
-				fmt.Printf("  %s %s%s %s\n", c.executableName(), extra, name, line)
+				FmtPrintf("  %s %s%s %s\n", c.executableName(), extra, name, line)
 			}
 		}
 	}
@@ -101,7 +102,7 @@ func (c *CommandRegistry) CommandHelp(name string) {
 
 // Determine the name of the executable
 func (c *CommandRegistry) executableName() string {
-	filename, _ := osext.Executable()
+	filename, _ := OSExtExecutable()
 	return path.Base(filename)
 }
 
