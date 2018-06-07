@@ -386,6 +386,11 @@ description about this command.`,
 								Type:        "MyType",
 								FailOnError: true,
 							},
+							&Argument{
+								Name:        "list",
+								Type:        "StringArray[]",
+								FailOnError: false,
+							},
 						},
 						Help: &CommandDescriptor{
 							Name: "my-command",
@@ -398,10 +403,17 @@ description about this command.`,
 					return "Command should not be called with VerboseMode"
 				}
 
-				value := "[E] Invalid argument: --owner=asd:yitsushi [Invalid format! MyType => 'ID:Name'"
-				if !strings.Contains(output, value) {
-					return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
+				values := []string{
+					"[E] Invalid argument: --owner=asd:yitsushi [Invalid format! MyType => 'ID:Name'",
+					"--owner=MyType <required>",
+					"--list=StringArray[] [optional]",
 				}
+				for _, value := range values {
+					if !strings.Contains(output, value) {
+						return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
+					}
+				}
+
 				return
 			},
 		},

@@ -114,6 +114,16 @@ func (c *CommandRegistry) CommandHelp(name string) {
 			FmtPrintf(command.Help.LongDescription)
 		}
 
+		for _, arg := range command.Arguments {
+			extra = " "
+			if arg.FailOnError {
+				extra += "<required>"
+			} else {
+				extra += "[optional]"
+			}
+			FmtPrintf("  --%s=%s%s\n", arg.Name, arg.Type, extra)
+		}
+
 		if len(command.Help.Examples) > 0 {
 			FmtPrintf("\nExamples:\n")
 			for _, line := range command.Help.Examples {
