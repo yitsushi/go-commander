@@ -1,3 +1,4 @@
+[![Documentation](https://godoc.org/github.com/yitsushi/go-commander?status.svg)](http://godoc.org/github.com/yitsushi/go-commander)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yitsushi/go-commander)](https://goreportcard.com/report/github.com/yitsushi/go-commander)
 [![Build Status](https://travis-ci.org/yitsushi/go-commander.svg?branch=master)](https://travis-ci.org/yitsushi/go-commander)
 
