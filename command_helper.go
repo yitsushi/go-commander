@@ -2,6 +2,7 @@ package commander
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -129,8 +130,27 @@ func (c *CommandHelper) Parse(flag []string) {
 	if c.Flags["v"] {
 		c.VerboseMode = true
 	}
+
+	for _, arg := range c.argList {
+		if c.Opt(arg.Name) != "" {
+			arg.SetValue(c.Opt(arg.Name))
+			if arg.Error != nil {
+				errorMessage := fmt.Sprintf(
+					"Invalid argument: --%s=%s [%s]",
+					arg.Name, arg.OriginalValue, arg.Error,
+				)
+
+				if arg.FailOnError {
+					panic(errorMessage)
+				}
+
+				FmtPrintf("%s\n", errorMessage)
+			}
+		}
+	}
 }
 
-func (c *CommandHelper) attachArgumentList(argumets []*Argument) {
+// AttachArgumentList binds an Argument list to CommandHelper
+func (c *CommandHelper) AttachArgumentList(argumets []*Argument) {
 	c.argList = argumets
 }

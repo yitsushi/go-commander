@@ -34,7 +34,6 @@ func (c *CommandRegistry) Register(f NewCommandFunc) {
 func (c *CommandRegistry) Execute() {
 	name := flag.Arg(c.Depth)
 	c.Helper = &CommandHelper{}
-	c.Helper.Parse(flag.Args()[c.Depth:])
 	if command, ok := c.Commands[name]; ok {
 		defer func() {
 			if err := recover(); err != nil {
@@ -43,25 +42,8 @@ func (c *CommandRegistry) Execute() {
 			}
 		}()
 
-		c.Helper.attachArgumentList(command.Arguments)
-
-		for _, arg := range command.Arguments {
-			if c.Helper.Opt(arg.Name) != "" {
-				arg.SetValue(c.Helper.Opt(arg.Name))
-				if arg.Error != nil {
-					errorMessage := fmt.Sprintf(
-						"Invalid argument: --%s=%s [%s]",
-						arg.Name, arg.OriginalValue, arg.Error,
-					)
-
-					if arg.FailOnError {
-						panic(errorMessage)
-					}
-
-					FmtPrintf("%s\n", errorMessage)
-				}
-			}
-		}
+		c.Helper.AttachArgumentList(command.Arguments)
+		c.Helper.Parse(flag.Args()[c.Depth:])
 
 		if command.Validator != nil {
 			command.Validator(c.Helper)
