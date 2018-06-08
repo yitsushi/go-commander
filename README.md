@@ -1,5 +1,6 @@
 [![Documentation](https://godoc.org/github.com/yitsushi/go-commander?status.svg)](http://godoc.org/github.com/yitsushi/go-commander)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yitsushi/go-commander)](https://goreportcard.com/report/github.com/yitsushi/go-commander)
+[![Coverage Status](https://coveralls.io/repos/github/yitsushi/go-commander/badge.svg)](https://coveralls.io/github/yitsushi/go-commander)
 [![Build Status](https://travis-ci.org/yitsushi/go-commander.svg?branch=master)](https://travis-ci.org/yitsushi/go-commander)
 
 This is a simple Go library to manage commands for your CLI tool.
