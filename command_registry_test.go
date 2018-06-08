@@ -1,14 +1,21 @@
 package commander
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 )
 
 var executeCalled bool
 var validatorCalled bool
+
+type MyCustomType struct {
+	ID   uint64
+	Name string
+}
 
 // Start: Commands
 // Simple command
@@ -17,6 +24,23 @@ type MyCommand struct {
 
 func (c *MyCommand) Execute(opts *CommandHelper) {
 	executeCalled = opts.VerboseMode
+
+	if opts.ErrorForTypedOpt("list") == nil {
+		myList := opts.TypedOpt("list").([]string)
+		if len(myList) > 0 {
+			mockPrintf("My list: %v\n", myList)
+		}
+	}
+
+	// Never defined, always shoud be an empty string
+	if opts.TypedOpt("no-key").(string) != "" {
+		panic("Something went wrong!")
+	}
+
+	if opts.ErrorForTypedOpt("owner") == nil {
+		owner := opts.TypedOpt("owner").(*MyCustomType)
+		mockPrintf("OwnerID: %d, Name: %s\n", owner.ID, owner.Name)
+	}
 
 	if opts.Flag("fail-me") {
 		panic("PANIC!!! PANIC!!! PANIC!!! Calm down, please!")
@@ -96,6 +120,27 @@ func TestCommandRegistry_executableName(t *testing.T) {
 }
 
 func TestCommandRegistry(t *testing.T) {
+
+	// register own Type
+	RegisterArgumentType("MyType", func(value string) (interface{}, error) {
+		values := strings.Split(value, ":")
+
+		if len(values) < 2 {
+			return &MyCustomType{}, errors.New("Invalid format! MyType => 'ID:Name'")
+		}
+
+		id, err := strconv.ParseUint(values[0], 10, 64)
+		if err != nil {
+			return &MyCustomType{}, errors.New("Invalid format! MyType => 'ID:Name'")
+		}
+
+		return &MyCustomType{
+				ID:   id,
+				Name: values[1],
+			},
+			nil
+	})
+
 	tests := []struct {
 		name     string
 		cliArgs  []string
@@ -231,6 +276,178 @@ description about this command.`,
 			test: func(r *CommandRegistry, output string) (errMsg string) {
 				if !executeCalled {
 					return "Command should be called with VerboseMode"
+				}
+				return
+			},
+		},
+		{
+			name:    "Register one command with Argument, call command",
+			cliArgs: []string{"my-command", "-v", "--list=one,two,three"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Arguments: []*Argument{
+							&Argument{
+								Name: "list",
+								Type: "StringArray[]",
+							},
+						},
+						Help: &CommandDescriptor{
+							Name: "my-command",
+						},
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if !executeCalled {
+					return "Command should be called with VerboseMode"
+				}
+
+				value := "My list: [one two three]"
+				if !strings.Contains(output, value) {
+					return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
+				}
+				return
+			},
+		},
+		{
+			name:    "Register one command with custom Argument, call command",
+			cliArgs: []string{"my-command", "-v", "--owner=12:yitsushi"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Arguments: []*Argument{
+							&Argument{
+								Name: "owner",
+								Type: "MyType",
+							},
+						},
+						Help: &CommandDescriptor{
+							Name: "my-command",
+						},
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if !executeCalled {
+					return "Command should be called with VerboseMode"
+				}
+
+				value := "wnerID: 12, Name: yitsushi"
+				if !strings.Contains(output, value) {
+					return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
+				}
+				return
+			},
+		},
+		{
+			name:    "Register one command with custom Argument, call command invalid",
+			cliArgs: []string{"my-command", "-v", "--owner=asd:yitsushi"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Arguments: []*Argument{
+							&Argument{
+								Name: "owner",
+								Type: "MyType",
+							},
+						},
+						Help: &CommandDescriptor{
+							Name: "my-command",
+						},
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if !executeCalled {
+					return "Command should be called with VerboseMode"
+				}
+
+				value := "Invalid argument: --owner=asd:yitsushi [Invalid format! MyType => 'ID:Name'"
+				if !strings.Contains(output, value) {
+					return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
+				}
+				return
+			},
+		},
+		{
+			name:    "Register one command with custom Argument, call command invalid",
+			cliArgs: []string{"my-command", "-v", "--owner=asd:yitsushi"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Arguments: []*Argument{
+							&Argument{
+								Name:        "owner",
+								Type:        "MyType",
+								FailOnError: true,
+							},
+							&Argument{
+								Name:        "list",
+								Type:        "StringArray[]",
+								FailOnError: false,
+							},
+						},
+						Help: &CommandDescriptor{
+							Name: "my-command",
+						},
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if executeCalled {
+					return "Command should not be called with VerboseMode"
+				}
+
+				values := []string{
+					"[E] Invalid argument: --owner=asd:yitsushi [Invalid format! MyType => 'ID:Name'",
+					"--owner=MyType <required>",
+					"--list=StringArray[] [optional]",
+				}
+				for _, value := range values {
+					if !strings.Contains(output, value) {
+						return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
+					}
+				}
+
+				return
+			},
+		},
+		{
+			name:    "Register one command with [Short] Argument, call command",
+			cliArgs: []string{"my-command", "-v", "--list=one,two,three"},
+			commands: []NewCommandFunc{
+				func(appName string) *CommandWrapper {
+					return &CommandWrapper{
+						Handler: &MyCommand{},
+						Arguments: []*Argument{
+							&Argument{
+								Name: "something",
+								Type: "String",
+							},
+							&Argument{
+								Name: "list",
+								Type: "StringArray[]",
+							},
+						},
+						Help: &CommandDescriptor{
+							Name: "my-command",
+						},
+					}
+				},
+			},
+			test: func(r *CommandRegistry, output string) (errMsg string) {
+				if !executeCalled {
+					return "Command should be called with VerboseMode"
+				}
+
+				value := "My list: [one two three]"
+				if !strings.Contains(output, value) {
+					return fmt.Sprintf("value(%s) not found in output(%s)", value, output)
 				}
 				return
 			},

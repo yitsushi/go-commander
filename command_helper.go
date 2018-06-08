@@ -1,6 +1,7 @@
 package commander
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -18,6 +19,8 @@ type CommandHelper struct {
 	Opts map[string]string
 	// Non-flag arguments
 	Args []string
+
+	argList []*Argument
 }
 
 // Log is a logger function for debug messages
@@ -53,6 +56,34 @@ func (c *CommandHelper) Flag(key string) bool {
 func (c *CommandHelper) Opt(key string) string {
 	if value, ok := c.Opts[key]; ok {
 		return value
+	}
+
+	return ""
+}
+
+// ErrorForTypedOpt returns an error if the given value for
+// the key is defined but not valid
+func (c *CommandHelper) ErrorForTypedOpt(key string) error {
+	for _, arg := range c.argList {
+		if arg.Name != key {
+			continue
+		}
+
+		return arg.Error
+	}
+
+	return errors.New("key not found")
+}
+
+// TypedOpt return with an item from the predifined argument list
+// based on the given key empty string if not exists
+func (c *CommandHelper) TypedOpt(key string) interface{} {
+	for _, arg := range c.argList {
+		if arg.Name != key {
+			continue
+		}
+
+		return arg.Value
 	}
 
 	return ""
@@ -98,4 +129,8 @@ func (c *CommandHelper) Parse(flag []string) {
 	if c.Flags["v"] {
 		c.VerboseMode = true
 	}
+}
+
+func (c *CommandHelper) attachArgumentList(argumets []*Argument) {
+	c.argList = argumets
 }

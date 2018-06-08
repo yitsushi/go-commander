@@ -28,4 +28,6 @@ type CommandWrapper struct {
 	Handler CommandHandler
 	// Validator will be executed before Execute on the Handler
 	Validator ValidatorFunc
+	// Arguments is a simple list of possible arguments with type definition
+	Arguments []*Argument
 }

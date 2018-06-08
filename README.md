@@ -165,3 +165,88 @@ description about this command.`,
   }
 }
 ```
+
+
+### Define arguments with type
+
+```go
+&commander.CommandWrapper{
+  Handler: &MyCommand{},
+  Arguments: []*commander.Argument{
+    &commander.Argument{
+      Name: "list",
+      Type: "StringArray[]",
+    },
+  },
+  Help: &commander.CommandDescriptor{
+    Name: "my-command",
+  },
+}
+```
+
+In your command:
+
+```go
+if opts.HasValidTypedOpt("list") == nil {
+  myList := opts.TypedOpt("list").([]string)
+  if len(myList) > 0 {
+    mockPrintf("My list: %v\n", myList)
+  }
+}
+```
+
+#### Define own type
+
+Yes you can ;)
+
+```go
+// Define your struct (optional)
+type MyCustomType struct {
+	ID   uint64
+	Name string
+}
+
+// register your own type with parsing/validation
+commander.RegisterArgumentType("MyType", func(value string) (interface{}, error) {
+  values := strings.Split(value, ":")
+
+  if len(values) < 2 {
+    return &MyCustomType{}, errors.New("Invalid format! MyType => 'ID:Name'")
+  }
+
+  id, err := strconv.ParseUint(values[0], 10, 64)
+  if err != nil {
+    return &MyCustomType{}, errors.New("Invalid format! MyType => 'ID:Name'")
+  }
+
+  return &MyCustomType{
+      ID:   id,
+      Name: values[1],
+    },
+    nil
+})
+
+// Define your command
+&commander.CommandWrapper{
+  Handler: &MyCommand{},
+  Arguments: []*commander.Argument{
+    &commander.Argument{
+      Name:        "owner",
+      Type:        "MyType",
+      FailOnError: true,          // Optional boolean
+    },
+  },
+  Help: &commander.CommandDescriptor{
+    Name: "my-command",
+  },
+}
+```
+
+In yout command:
+
+```go
+if opts.HasValidTypedOpt("owner") == nil {
+  owner := opts.TypedOpt("owner").(*MyCustomType)
+  mockPrintf("OwnerID: %d, Name: %s\n", owner.ID, owner.Name)
+}
+```
