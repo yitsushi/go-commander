@@ -1,9 +1,33 @@
 package commander
 
 import (
+	"errors"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 )
+
+func ExampleRegisterArgumentType() {
+	RegisterArgumentType("MyType", func(value string) (interface{}, error) {
+		values := strings.Split(value, ":")
+
+		if len(values) < 2 {
+			return &MyCustomType{}, errors.New("Invalid format! MyType => 'ID:Name'")
+		}
+
+		id, err := strconv.ParseUint(values[0], 10, 64)
+		if err != nil {
+			return &MyCustomType{}, errors.New("Invalid format! MyType => 'ID:Name'")
+		}
+
+		return &MyCustomType{
+				ID:   id,
+				Name: values[1],
+			},
+			nil
+	})
+}
 
 func TestArgument_GetValue(t *testing.T) {
 	type fields struct {
@@ -89,7 +113,7 @@ func TestArgument_GetValue(t *testing.T) {
 				Type:          tt.fields.Type,
 				OriginalValue: tt.fields.OriginalValue,
 			}
-			a.AddValue(tt.parameter)
+			a.SetValue(tt.parameter)
 			if got := a.Value; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Argument.Value = %v, want %v", got, tt.want)
 			}

@@ -26,9 +26,9 @@ type Argument struct {
 	FailOnError   bool
 }
 
-// AddValue saves the original value to the argument.
+// SetValue saves the original value to the argument.
 // Returns with an error if conversion failed
-func (a *Argument) AddValue(original string) error {
+func (a *Argument) SetValue(original string) error {
 	a.OriginalValue = original
 	a.Value, a.Error = argumentTypeList[a.Type](a.OriginalValue)
 

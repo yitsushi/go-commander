@@ -47,7 +47,7 @@ func (c *CommandRegistry) Execute() {
 
 		for _, arg := range command.Arguments {
 			if c.Helper.Opt(arg.Name) != "" {
-				arg.AddValue(c.Helper.Opt(arg.Name))
+				arg.SetValue(c.Helper.Opt(arg.Name))
 				if arg.Error != nil {
 					errorMessage := fmt.Sprintf(
 						"Invalid argument: --%s=%s [%s]",
