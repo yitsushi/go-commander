@@ -244,7 +244,7 @@ commander.RegisterArgumentType("MyType", func(value string) (interface{}, error)
 }
 ```
 
-In yout command:
+In your command:
 
 ```go
 if opts.HasValidTypedOpt("owner") == nil {
