@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 type argumentTypeFunction func(string) (interface{}, error)
@@ -57,6 +59,7 @@ func init() {
 	})
 
 	RegisterArgumentType("FilePath", func(value string) (interface{}, error) {
+		value, _ = homedir.Expand(value)
 		_, err := os.Stat(value)
 
 		if os.IsNotExist(err) {
